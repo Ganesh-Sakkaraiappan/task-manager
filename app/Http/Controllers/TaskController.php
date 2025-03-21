@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Jobs\WriteLogJob;
 
 class TaskController extends Controller
 {
@@ -28,7 +29,10 @@ class TaskController extends Controller
             'status' => 'in:pending,failed,completed',
         ]);
         
-        Task::create($request->all());
+        $task = Task::create($request->all());
+        
+        dispatch(new WriteLogJob($task));
+        
         return redirect()->route('tasks.index')->with('Task created Successfully');
     }
     
@@ -63,4 +67,5 @@ class TaskController extends Controller
         $task -> delete();
         return redirect()->back()->with('Task deleted successfully');
     }
+    
 }
